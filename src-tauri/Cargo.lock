@@ -501,7 +501,7 @@ dependencies = [
 
 [[package]]
 name = "chewing-preferences"
-version = "25.8.1"
+version = "25.10.0"
 dependencies = [
  "anyhow",
  "chewing",
