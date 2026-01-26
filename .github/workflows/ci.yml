@@ -1,0 +1,66 @@
+name: CI
+
+env:
+  LLVM_MINGW_VERSION: 20251216
+
+on:
+  push:
+    branches: ["main", "stable/*"]
+  pull_request:
+    branches: ["main", "stable/*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - name: Cache llvm-mingw
+        id: cache-llvm-linux
+        uses: actions/cache@v4
+        with:
+          path: /opt/llvm-mingw
+          key: llvm-mingw-${{ runner.os }}-${{ env.LLVM_MINGW_VERSION }}
+
+      - name: Install llvm-mingw ${{ env.LLVM_MINGW_VERSION }}
+        if: steps.cache-llvm-linux.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /opt/llvm-mingw
+          cd /opt/llvm-mingw
+          curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/${LLVM_MINGW_VERSION}/llvm-mingw-${LLVM_MINGW_VERSION}-ucrt-ubuntu-22.04-x86_64.tar.xz | tar xJ --strip-components=1
+
+      - name: Setup llvm-mingw
+        run: |
+          echo "/opt/llvm-mingw/bin" >> $GITHUB_PATH
+
+      - name: Setup rust targets
+        run: |
+          rustup set auto-self-update disable
+          rustup target add i686-pc-windows-gnullvm
+          rustup target add x86_64-pc-windows-gnullvm
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install NPM dependencies
+        run: npm install
+
+      - name: Build
+        env:
+          # HACK: force embed-resource to use llvm-rc
+          RC: llvm-rc
+        run: |
+          npm run tauri -- build --target x86_64-pc-windows-gnullvm
+          mkdir artifacts
+          cp  src-tauri/target/x86_64-pc-windows-gnullvm/release/*.exe artifacts
+          cp  src-tauri/target/x86_64-pc-windows-gnullvm/release/*.dll artifacts
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Artifact
+          path: artifacts
