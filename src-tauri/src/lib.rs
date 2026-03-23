@@ -3,12 +3,14 @@ use self::config::import_config;
 use self::config::load_config;
 use self::config::save_config;
 use self::fonts::get_system_fonts;
-use tauri::menu::{MenuBuilder, SubmenuBuilder};
+use self::version::chewing_version;
 use tauri::Emitter;
 use tauri::Manager;
+use tauri::menu::{MenuBuilder, SubmenuBuilder};
 
 mod config;
 mod fonts;
+mod version;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -67,7 +69,8 @@ pub fn run() {
             export_config,
             load_config,
             save_config,
-            get_system_fonts
+            get_system_fonts,
+            chewing_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

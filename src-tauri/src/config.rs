@@ -2,7 +2,7 @@
 
 use std::{env, fs, path::PathBuf};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use chewing::path::data_dir;
 use chewing_tip::config::Config;
 

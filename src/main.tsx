@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import About from "./About";
-import version from "./version";
+import { invoke } from "@tauri-apps/api/core";
 import { getAllWindows } from "@tauri-apps/api/window";
 import { usePrefersColorScheme } from "./theme";
 import {
@@ -12,10 +12,11 @@ import {
 } from "@fluentui/react-components";
 
 getAllWindows().then(async (wins) => {
+  let version = await invoke("chewing_version") as { product_version: string, build_date: string };
   for (const w of wins) {
     let title = await w.title();
-    if (!title.includes(version.productVersion)) {
-      w.setTitle(`${title} (${version.productVersion})`);
+    if (!title.includes(version.product_version)) {
+      w.setTitle(`${title} (${version.product_version})`);
     }
   }
 });

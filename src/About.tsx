@@ -4,6 +4,8 @@ import {
   Body1,
   Caption1,
 } from "@fluentui/react-components";
+import React, { useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { getAllWindows, getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { exit } from "@tauri-apps/plugin-process";
@@ -42,6 +44,14 @@ const useStyles = makeStyles({
 function About() {
   const styles = useStyles();
 
+  const [chewingVersion, setChewingVersion] = React.useState({ product_version: "", build_date: "" });
+
+  useEffect(() => {
+    invoke("chewing_version").then(v => {
+      setChewingVersion(v);
+    });
+  }, [])
+
   const hide_or_exit = async () => {
     const wins = await getAllWindows();
     const main = wins.find((w) => w.label == "main");
@@ -66,8 +76,10 @@ function About() {
         </div>
         <div className={styles.column}>
           <Body1>新酷音 － 智慧型注音輸入法</Body1>
-          <Body1>版本：{version.productVersion}</Body1>
-          <Body1>發行日期：{version.buildDate}</Body1>
+          <Body1>酷音版本：{chewingVersion.product_version}</Body1>
+          <Body1>酷音發行日期：{chewingVersion.build_date}</Body1>
+          <Body1>設定程式版本：{version.productVersion}</Body1>
+          <Body1>設定程式發行日期：{version.buildDate}</Body1>
           <Body1>軟體開發者：libchewing 開發團隊</Body1>
           <Body1>授權方式：GPL-3.0-or-later</Body1>
           <Body1>
