@@ -41,16 +41,24 @@ const useStyles = makeStyles({
   },
 });
 
+type ChewingVersion = {
+  product_version: string;
+  build_date: string;
+};
+
 function About() {
   const styles = useStyles();
 
-  const [chewingVersion, setChewingVersion] = React.useState({ product_version: "", build_date: "" });
+  const [chewingVersion, setChewingVersion] = React.useState<ChewingVersion>({
+    product_version: "",
+    build_date: "",
+  });
 
   useEffect(() => {
-    invoke("chewing_version").then(v => {
-      setChewingVersion(v);
+    invoke("chewing_version").then((v) => {
+      setChewingVersion(v as ChewingVersion);
     });
-  }, [])
+  }, []);
 
   const hide_or_exit = async () => {
     const wins = await getAllWindows();
