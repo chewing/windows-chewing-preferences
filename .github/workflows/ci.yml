@@ -1,7 +1,7 @@
 name: CI
 
 env:
-  LLVM_MINGW_VERSION: 20251216
+  LLVM_MINGW_VERSION: 20260311
 
 on:
   push:
@@ -35,13 +35,10 @@ jobs:
       - name: Setup rust targets
         run: |
           rustup set auto-self-update disable
-          rustup target add i686-pc-windows-gnullvm
           rustup target add x86_64-pc-windows-gnullvm
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - uses: actions/checkout@v6
-        with:
-          submodules: true
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -52,8 +49,7 @@ jobs:
 
       - name: Build
         env:
-          # HACK: force embed-resource to use llvm-rc
-          RC: llvm-rc
+          RUSTFLAGS: -Ctarget-feature=+crt-static
         run: |
           npm run tauri -- build --target x86_64-pc-windows-gnullvm
           mkdir artifacts
